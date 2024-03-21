@@ -1,5 +1,6 @@
 import subprocess
-from utils import lighten, selectColor, setColorScheme, kwinrules, kcolorschemes, transformName
+import re
+from utils import lighten, selectColor, setColorScheme, kwinrules, kcolorschemes
 
 prefix = "TKP-"
 
@@ -8,27 +9,23 @@ subprocess.Popen(f'touch {kwinrules}'.split(), stdout=subprocess.PIPE)
 createDirectoryCommand = f'mkdir -p {kcolorschemes}'
 subprocess.Popen(createDirectoryCommand.split(), stdout=subprocess.PIPE)
 
-wmctrlCommand = ['wmctrl', '-l', '-x']
-awkCommand = ['awk', '{print $3}']
+print("Select a application")
 
-wmctrlProcess = subprocess.Popen(wmctrlCommand, stdout=subprocess.PIPE)
-awkProcess = subprocess.Popen(awkCommand, stdin=wmctrlProcess.stdout, universal_newlines=True, stdout=subprocess.PIPE)
-wmctrlProcess.wait()
+xpropCommand = "xprop"
+xpropList = subprocess.check_output(
+    xpropCommand.split(), universal_newlines=True).strip().split()
+xpropTitleIndex = 0
 
-windowList = awkProcess.stdout.read().splitlines()
-windowListForDialog = []
+for (index, item) in enumerate(xpropList):
+    if item == "WM_CLASS(STRING)":
+        xpropTitleIndex = index + 2
 
-for i in windowList:
-    windowListForDialog.extend([i, i.split('.')[1]])
-
-kdialogCommand = ['kdialog', '--title', 'TKP - Tile Color Picker', '--menu', 'Select window to chante title bar color'] + windowListForDialog
-
-selectedWindow = subprocess.check_output(kdialogCommand, universal_newlines=True)
-selectedWindowClass = ' '.join(selectedWindow.split('.')).strip()
-selectedWindowName = selectedWindow.split('.')[1].strip()
-
-appName = transformName(selectedWindowName)
+name = xpropList[xpropTitleIndex].replace(',', '').replace('"', '')
+appName = ''.join(x.capitalize() for x in re.split(
+    r"[^a-zA-Z0-9 \s]", xpropList[xpropTitleIndex]))
 ruleName = f'{prefix}{appName}'
+
+print(f'Name: {name}')
 
 hexColor, rgbTuple = selectColor()
 
@@ -97,29 +94,30 @@ kwinRulesFile.close()
 
 groupIndex = groupIndex + 1 if not isAlreadyInKwinrules else groupIndex
 
+
 def writeConfig(key, value):
-    command = ['kwriteconfig6', '--file', kwinrules, '--group', str(groupIndex), '--key', key, value]
-    subprocess.Popen(command, stdout=subprocess.PIPE).wait()
+    command = f'kwriteconfig5 --file {kwinrules} --group {groupIndex} --key {key} {value}'
+    subprocess.Popen(command.split(), stdout=subprocess.PIPE).wait()
+
 
 if not isAlreadyInKwinrules:
     writeConfig("Description", ruleName)
     writeConfig("decocolor", ruleName)
-    writeConfig("decocolorrule", "2")
-    writeConfig("wmclass", selectedWindowClass)
-    writeConfig("wmclasscomplete", "true")
-    writeConfig("wmclassmatch", "1")
+    writeConfig("decocolorrule", 2)
+    writeConfig("wmclass", name)
+    writeConfig("wmclassmatch", 1)
 
-    newCount = f'kwriteconfig6 --file {kwinrules} --group General --key count {int(kgroupnum) + 1}'
+    newCount = f'kwriteconfig5 --file {kwinrules} --group General --key count {int(kgroupnum) + 1}'
     subprocess.Popen(newCount.split(), stdout=subprocess.PIPE).wait()
 
     newRulesStr = f'{kgroupstr},{groupIndex}'
-    newRules = f'kwriteconfig6 --file {kwinrules} --group General --key rules {newRulesStr if kgroupstr else groupIndex}'
+    newRules = f'kwriteconfig5 --file {kwinrules} --group General --key rules {newRulesStr if kgroupstr else groupIndex}'
     subprocess.Popen(newRules.split(), stdout=subprocess.PIPE).wait()
 
-    qdbusCommand = f'qdbus6 org.kde.KWin /KWin reconfigure'
+    qdbusCommand = f'qdbus-qt5 org.kde.KWin /KWin reconfigure'
     subprocess.Popen(qdbusCommand.split(), stdout=subprocess.PIPE).wait()
 else:
-    qdbusCommand = f'qdbus6 org.kde.KWin /KWin reconfigure'
+    qdbusCommand = f'qdbus-qt5 org.kde.KWin /KWin reconfigure'
 
     writeConfig("decocolor", "BreezeDark")
 

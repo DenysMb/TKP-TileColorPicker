@@ -1,5 +1,6 @@
-import colorsys
+import unicodedata
 import subprocess
+import colorsys
 import os
 
 dir = os.path.dirname(__file__)
@@ -53,3 +54,7 @@ def selectColor():
     rgbTuple = tuple(int(hexColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
 
     return hexColor, rgbTuple
+
+def transformName(name):
+    name = unicodedata.normalize('NFD', name)
+    return name.upper()

@@ -1,3 +1,19 @@
 #!/bin/bash
 path=$(dirname -- "$(readlink -f -- "$0")")
-python3 ${path}/tkp.py
+
+session=$XDG_SESSION_TYPE
+plasmaVersion=$(plasmashell --version | awk -F '[^0-9]+' '{printf $2}')
+
+if [ "$session" = "wayland" ]; then
+    if [ "$plasmaVersion" = "6" ]; then
+        python3 ${path}/tkp.py
+    else
+        python3 ${path}/tkp-plasma5.py
+    fi
+else
+    if [ "$plasmaVersion" = "6" ]; then
+        python3 ${path}/tkp-x11.py
+    else
+        python3 ${path}/tkp-x11-plasma5.py
+    fi
+fi

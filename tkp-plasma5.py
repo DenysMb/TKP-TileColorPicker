@@ -98,7 +98,7 @@ kwinRulesFile.close()
 groupIndex = groupIndex + 1 if not isAlreadyInKwinrules else groupIndex
 
 def writeConfig(key, value):
-    command = ['kwriteconfig6', '--file', kwinrules, '--group', str(groupIndex), '--key', key, value]
+    command = ['kwriteconfig5', '--file', kwinrules, '--group', str(groupIndex), '--key', key, value]
     subprocess.Popen(command, stdout=subprocess.PIPE).wait()
 
 if not isAlreadyInKwinrules:
@@ -109,17 +109,17 @@ if not isAlreadyInKwinrules:
     writeConfig("wmclasscomplete", "true")
     writeConfig("wmclassmatch", "1")
 
-    newCount = f'kwriteconfig6 --file {kwinrules} --group General --key count {int(kgroupnum) + 1}'
+    newCount = f'kwriteconfig5 --file {kwinrules} --group General --key count {int(kgroupnum) + 1}'
     subprocess.Popen(newCount.split(), stdout=subprocess.PIPE).wait()
 
     newRulesStr = f'{kgroupstr},{groupIndex}'
-    newRules = f'kwriteconfig6 --file {kwinrules} --group General --key rules {newRulesStr if kgroupstr else groupIndex}'
+    newRules = f'kwriteconfig5 --file {kwinrules} --group General --key rules {newRulesStr if kgroupstr else groupIndex}'
     subprocess.Popen(newRules.split(), stdout=subprocess.PIPE).wait()
 
-    qdbusCommand = f'qdbus6 org.kde.KWin /KWin reconfigure'
+    qdbusCommand = f'qdbus-qt5 org.kde.KWin /KWin reconfigure'
     subprocess.Popen(qdbusCommand.split(), stdout=subprocess.PIPE).wait()
 else:
-    qdbusCommand = f'qdbus6 org.kde.KWin /KWin reconfigure'
+    qdbusCommand = f'qdbus-qt5 org.kde.KWin /KWin reconfigure'
 
     writeConfig("decocolor", "BreezeDark")
 
