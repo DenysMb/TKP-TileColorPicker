@@ -58,3 +58,15 @@ def selectColor():
 def transformName(name):
     name = unicodedata.normalize('NFD', name)
     return name.upper()
+
+def windowListToDictionary(list):
+    windowDictionary = {
+        'noApplication': 'No application',
+    }
+
+    for item in list:
+        key = item.split('.')[1].strip()
+        value = ' '.join(item.split('.')).strip()
+        windowDictionary[key] = value
+
+    return windowDictionary

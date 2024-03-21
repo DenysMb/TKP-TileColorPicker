@@ -2,7 +2,7 @@
 path=$(dirname -- "$(readlink -f -- "$0")")
 
 session=$XDG_SESSION_TYPE
-plasmaVersion=$(plasmashell --version | awk -F '[^0-9]+' '{printf $2}')
+plasmaVersion=$(distrobox-enter -- distrobox-host-exec plasmashell --version | awk -F '[^0-9]+' '{printf $2}')
 
 if [ "$session" = "wayland" ]; then
     if [ "$plasmaVersion" = "6" ]; then

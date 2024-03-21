@@ -1,5 +1,5 @@
 import subprocess
-from utils import lighten, selectColor, setColorScheme, kwinrules, kcolorschemes, transformName
+from utils import lighten, selectColor, setColorScheme, kwinrules, kcolorschemes, transformName, windowListToDictionary
 
 prefix = "TKP-"
 
@@ -16,16 +16,25 @@ awkProcess = subprocess.Popen(awkCommand, stdin=wmctrlProcess.stdout, universal_
 wmctrlProcess.wait()
 
 windowList = awkProcess.stdout.read().splitlines()
-windowListForDialog = []
+windowDictionary = windowListToDictionary(windowList)
+windowNameList = []
 
 for i in windowList:
-    windowListForDialog.extend([i, i.split('.')[1]])
+    windowNameList.append(i.split('.')[1].strip())
 
-kdialogCommand = ['kdialog', '--title', 'TKP - Tile Color Picker', '--menu', 'Select window to chante title bar color'] + windowListForDialog
+kdialogCommand = ['kdialog', '--title', 'TKP - Tile Color Picker', '--combobox', 'Select window to change title bar color', 'No application'] + windowNameList + ['--default', 'No application']
 
-selectedWindow = subprocess.check_output(kdialogCommand, universal_newlines=True)
-selectedWindowClass = ' '.join(selectedWindow.split('.')).strip()
-selectedWindowName = selectedWindow.split('.')[1].strip()
+selectedWindow = subprocess.check_output(kdialogCommand, universal_newlines=True).strip()
+
+noAppSelected = selectedWindow == 'No application'
+
+if (noAppSelected):
+    kdialogNoAppCommand = ['kdialog', '--title', 'TKP - Tile Color Picker', '--inputbox', 'Type application name']
+    selectedWindowName = subprocess.check_output(kdialogNoAppCommand, universal_newlines=True).strip()
+    selectedWindowClass = "(?i).*" + selectedWindowName + ".*"
+else:
+    selectedWindowClass = windowDictionary[selectedWindow]
+    selectedWindowName = selectedWindow.strip()
 
 appName = transformName(selectedWindowName)
 ruleName = f'{prefix}{appName}'
@@ -102,12 +111,15 @@ def writeConfig(key, value):
     subprocess.Popen(command, stdout=subprocess.PIPE).wait()
 
 if not isAlreadyInKwinrules:
+    wmClassComplete = "false" if noAppSelected else "true"
+    wmClassMatch = "3" if noAppSelected else "1"
+
     writeConfig("Description", ruleName)
     writeConfig("decocolor", ruleName)
     writeConfig("decocolorrule", "2")
     writeConfig("wmclass", selectedWindowClass)
-    writeConfig("wmclasscomplete", "true")
-    writeConfig("wmclassmatch", "1")
+    writeConfig("wmclasscomplete", wmClassComplete)
+    writeConfig("wmclassmatch", wmClassMatch)
 
     newCount = f'kwriteconfig5 --file {kwinrules} --group General --key count {int(kgroupnum) + 1}'
     subprocess.Popen(newCount.split(), stdout=subprocess.PIPE).wait()
