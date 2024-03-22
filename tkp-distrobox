@@ -1,19 +1,10 @@
 #!/bin/bash
 path=$(dirname -- "$(readlink -f -- "$0")")
 
-session=$XDG_SESSION_TYPE
 plasmaVersion=$(distrobox-enter -- distrobox-host-exec plasmashell --version | awk -F '[^0-9]+' '{printf $2}')
 
-if [ "$session" = "wayland" ]; then
-    if [ "$plasmaVersion" = "6" ]; then
-        distrobox-enter -- python3 ${path}/tkp.py
-    else
-        distrobox-enter -- python3 ${path}/tkp-plasma5.py
-    fi
+if [ "$plasmaVersion" = "6" ]; then
+    distrobox-enter -- python3 ${path}/tkp.py
 else
-    if [ "$plasmaVersion" = "6" ]; then
-        distrobox-enter -- python3 ${path}/tkp-x11.py
-    else
-        distrobox-enter -- python3 ${path}/tkp-x11-plasma5.py
-    fi
+    distrobox-enter -- python3 ${path}/tkp-plasma5.py
 fi

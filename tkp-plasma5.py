@@ -20,7 +20,9 @@ windowDictionary = windowListToDictionary(windowList)
 windowNameList = []
 
 for i in windowList:
-    windowNameList.append(i.split('.')[1].strip())
+    windowName = i.split('.')[1].strip()
+    if (windowName != 'plasmashell'):
+        windowNameList.append(windowName)
 
 kdialogCommand = ['kdialog', '--title', 'TKP - Tile Color Picker', '--combobox', 'Select window to change title bar color', 'No application'] + windowNameList + ['--default', 'No application']
 
