@@ -44,10 +44,12 @@ def setColorScheme(color):
 def selectColor():
     print("Select window color from screen")
 
-    kcolorchooserCommand = 'kcolorchooser --print'
+    colorPickerCommand = 'busctl --user call org.kde.KWin /ColorPicker org.kde.kwin.ColorPicker pick'
 
-    hexColor = subprocess.check_output(
-        kcolorchooserCommand.split(), universal_newlines=True).strip()
+    colorInt = subprocess.check_output(
+        colorPickerCommand.split(), universal_newlines=True).strip()
+    
+    hexColor = "#" + hex(int(colorInt.split()[-1]))[4:]
 
     print(f'Window color: {hexColor}')
 
