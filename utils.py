@@ -53,6 +53,10 @@ def selectColor():
 
     rgbTuple = tuple(int(hexColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
 
+    # Sum all values in the tuple +1 to fix the problem of the
+    # wrong color being selected in Wayland (darker than the actual color)
+    rgbTuple = tuple(x + 1 for x in rgbTuple)
+
     return hexColor, rgbTuple
 
 def transformName(name):
