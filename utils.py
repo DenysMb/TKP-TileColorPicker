@@ -10,24 +10,12 @@ kwinrules = os.path.expanduser("~/.config/kwinrulesrc")
 kcolorschemes = os.path.expanduser("~/.local/share/color-schemes")
 
 
-def lighten(color, amount=0.5):
-    r = color[0]
-    g = color[1]
-    b = color[2]
+def colorTupleToString(color):
+    colorString = f'{",".join(map(str, tuple(map(int, color))))}'
 
-    hslColor = colorsys.rgb_to_hls(r, g, b)
+    print(f'Color tuple: {colorString}')
 
-    newR = hslColor[0] if hslColor[0] <= 255 else 255
-    newG = 1 - amount * (1 - hslColor[1])
-    newB = hslColor[2]
-
-    colorTuple = colorsys.hls_to_rgb(newR, newG, newB)
-
-    colorList = list(colorTuple)
-    colorList[:] = [x if x <= 255 else 255 for x in colorList]
-    colorTuple = tuple(colorList)
-
-    return f'{",".join(map(str, tuple(map(int, colorTuple))))}'
+    return colorString
 
 
 def setColorScheme(color):
@@ -51,11 +39,10 @@ def selectColor():
 
     print(f'Window color: {hexColor}')
 
-    rgbTuple = tuple(int(hexColor.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+    rgbTuple = tuple(int(hexColor[i:i+2], 16) for i in range(1, 7, 2))
 
-    # Sum all values in the tuple +1 to fix the problem of the
-    # wrong color being selected in Wayland (darker than the actual color)
-    rgbTuple = tuple(x + 1 for x in rgbTuple)
+    print(f'RGB color: {rgbTuple}')
+    print(f'Hex color: {hexColor}')
 
     return hexColor, rgbTuple
 

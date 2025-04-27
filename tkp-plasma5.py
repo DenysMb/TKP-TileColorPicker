@@ -1,5 +1,5 @@
 import subprocess
-from utils import lighten, selectColor, setColorScheme, kwinrules, kcolorschemes, transformName, windowListToDictionary
+from utils import colorTupleToString, selectColor, setColorScheme, kwinrules, kcolorschemes, transformName, windowListToDictionary
 
 prefix = "TKP-"
 
@@ -43,7 +43,7 @@ ruleName = f'{prefix}{appName}'
 
 hexColor, rgbTuple = selectColor()
 
-rgbColor = lighten(rgbTuple, 1)
+rgbColor = colorTupleToString(rgbTuple)
 
 newColorScheme = f'{kcolorschemes}/{ruleName}.colors'
 
